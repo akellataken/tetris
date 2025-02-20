@@ -66,5 +66,10 @@ fieldset {
 }
 
 fieldset legend {
-  padding: 0 1rem;  
+  padding: 0 1rem;
+}
+
+#next,
+#saved {
+  margin: auto;
 }
