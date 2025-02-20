@@ -1,0 +1,70 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  font-size: 50px;
+  font-family: "Micro 5", sans-serif, serif;
+  background-color: #000;
+  color: #fff;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  justify-content: space-evenly;
+}
+
+footer {
+  text-align: center;
+  font-family: serif;
+  font-size: 14px;
+  color: #424242;
+  position: relative;
+  margin-top: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.sidebar {
+  border: 8px double #fff;
+  border-radius: 10px;
+  padding: 20px;
+  width: 20%;
+}
+
+.sidebar fieldset:last-of-type {
+  margin-bottom: 20px;
+}
+
+#game {
+  border: 8px double #fff;
+  border-radius: 10px;
+}
+
+.score {
+  text-align: center;
+}
+
+.controls p {
+  font-size: 40px;
+}
+
+fieldset {
+  border-radius: 5px;
+}
+
+fieldset legend {
+  padding: 0 1rem;  
+}

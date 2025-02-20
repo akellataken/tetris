@@ -1,13 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tetris</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="tetris.js"></script>
-</head>
-<body>
-    
-</body>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>TETRIS</h1>
+    </header>
+    <main>
+      <div class="sidebar">
+        <fieldset class="styled-fieldset">
+          <legend>NEXT</legend>
+          <canvas id="next" width="200" height="100"></canvas>
+        </fieldset>
+        <fieldset class="styled-fieldset">
+          <legend>SAVED</legend>
+          <canvas id="saved" width="200" height="100"></canvas>
+        </fieldset>
+      </div>
+      <!-- Field 10x20. Each square side is 20 px + 1px border. -->
+      <canvas id="game" width="209" height="419"></canvas>
+      <div class="sidebar">
+        <fieldset class="styled-fieldset">
+          <legend>SCORE</legend>
+          <p class="score" id="score">0</p>
+        </fieldset>
+        <fieldset class="styled-fieldset">
+          <legend>TOP SCORE</legend>
+          <p class="score" id="topscore">0</p>
+        </fieldset>
+        <div class="controls">
+          <p>CONTROLS:</p>
+          <p>LEFT: A</p>
+          <p>RIGHT: D</p>
+          <p>ROTATE: W</p>
+          <p>DOWN: S</p>
+          <p>SAVE: C</p>
+          <p>DROP: SPACE</p>
+          <p>PAUSE: P</p>
+          <p>RESTART: R</p>
+        </div>
+      </div>
+    </main>
+    <div class="spacer"></div>
+    <footer>
+      <p>© akellataken. All tetris related IP belong to their owners.</p>
+    </footer>
+  </body>
 </html>
+
+<script src="script.js"></script>
