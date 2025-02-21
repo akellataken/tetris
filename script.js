@@ -210,11 +210,12 @@ let field = Array.from({ length: 10 }, () =>
 
 let currentTetromino = getRandomTetromino();
 let nextTetromino = getRandomTetromino();
-let savedTetromino = [];
+let savedTetromino;
 let gameSpeed = 1.0;
+let offset = [4, -1];
 let canRenderGameTick = false;
-let offset = [3, -2];
 let paused = false;
+let alreadySaved = false;
 
 function canMoveLeft() {
   for (let i = 0; i < currentTetromino.blocks.length; i++) {
@@ -269,7 +270,8 @@ function fixateTetromino() {
   }
   currentTetromino = nextTetromino;
   nextTetromino = getRandomTetromino();
-  offset = [4, -2];
+  offset = [4, -1];
+  alreadySaved = false;
 }
 
 function onKeyRight() {
@@ -299,20 +301,29 @@ function onKeyPause() {
 }
 
 function onKeySave() {
-  const temp = currentTetromino;
-  if (savedTetromino.length != 0) {
-    currentTetromino = savedTetromino;
-  } else {
-    currentTetromino = getRandomTetromino();
+  console.log(`alreadySaved = ${alreadySaved}`);
+  if (!alreadySaved) {
+    const temp = currentTetromino;
+    if (savedTetromino !== undefined) {
+      currentTetromino = savedTetromino;
+    } else {
+      currentTetromino = getRandomTetromino();
+    }
+    savedTetromino = temp;
+    offset = [4, -1];
+    alreadySaved = true;
   }
-  savedTetromino = temp;
 }
 
 function onKeyRestart() {
-  offset = [4, -2];
+  offset = [4, -1];
   field = Array.from({ length: 10 }, () =>
     Array.from({ length: 20 }, () => Brick.NONE)
   );
+  currentTetromino = getRandomTetromino();
+  nextTetromino = getRandomTetromino();
+  savedTetromino = undefined;
+  alreadySaved = false;
 }
 
 function clear(context, width, height) {
@@ -348,9 +359,9 @@ function drawField() {
 }
 
 function drawTetromino(tetromino, context, useOffset) {
-  if (tetromino.blocks === undefined || tetromino.blocks === 0) return;
+  if (tetromino === undefined || tetromino.blocks === 0) return;
   tetromino.blocks.forEach((tetro) => {
-    if (tetro[1] + offset[1] < 0) return;
+    if (tetro[1] + (useOffset ? offset[1] : 0) < 0) return;
     const x =
       (tetro[0] + (useOffset ? offset[0] : 0)) * CELL_SIZE +
       (tetro[0] + (useOffset ? offset[0] : 0));
@@ -388,7 +399,7 @@ async function gameLoop() {
         onKeyFall();
         canRenderGameTick = false;
       }
-      setTimeout(resolve, 1000 / 30);
+      setTimeout(resolve, 1000 / 60);
     }
   });
   window.requestAnimationFrame(gameLoop);
