@@ -204,6 +204,7 @@ function getRandomTetromino() {
   };
 }
 
+// TODO: Try remaking 20 -> 10 instead of 10 -> 20
 let field = Array.from({ length: 10 }, () =>
   Array.from({ length: 20 }, () => Brick.NONE)
 );
@@ -222,7 +223,6 @@ function canMoveLeft() {
     const tetro = currentTetromino.blocks[i];
     if (
       tetro[0] + offset[0] <= 0 ||
-      tetro[1] + offset[1] < 0 ||
       (field[tetro[0] + offset[0] - 1][tetro[1] + offset[1]] !== Brick.NONE &&
         field[tetro[0] + offset[0] - 1][tetro[1] + offset[1]] !== undefined)
     ) {
@@ -237,7 +237,6 @@ function canMoveRight() {
     const tetro = currentTetromino.blocks[i];
     if (
       tetro[0] + offset[0] >= 9 ||
-      tetro[1] + offset[1] < 0 ||
       (field[tetro[0] + offset[0] + 1][tetro[1] + offset[1]] !== Brick.NONE &&
         field[tetro[0] + offset[0] + 1][tetro[1] + offset[1]] !== undefined)
     ) {
@@ -261,6 +260,27 @@ function canFall() {
   return true;
 }
 
+// TODO: reimplement with full row swap.
+function clearLines() {
+  let fullLine = true;
+  for (let i = 0; i < field[0].length; i++) {
+    for (let j = field.length - 1; j > 0; j--) {
+      if (field[j][i] === Brick.NONE) {
+        fullLine = false;
+        break;
+      }
+    }
+    if (fullLine) {
+      for (let j = 0; j < field.length; j++) {
+        field[j][i] = Brick.NONE;
+        field[j].splice(j, 1);
+        field[j].splice(0, 0, Brick.NONE);
+      }
+    }
+    fullLine = true;
+  }
+}
+
 function fixateTetromino() {
   for (let i = 0; i < currentTetromino.blocks.length; i++) {
     const tetro = currentTetromino.blocks[i];
@@ -268,6 +288,7 @@ function fixateTetromino() {
     const y = tetro[1] + offset[1];
     field[x][y] = currentTetromino.color;
   }
+  clearLines();
   currentTetromino = nextTetromino;
   nextTetromino = getRandomTetromino();
   offset = [4, -1];
@@ -284,7 +305,12 @@ function onKeyLeft() {
   offset = [offset[0] - 1, offset[1]];
 }
 
-function onKeyRotate() {}
+function onKeyRotate() {
+  currentTetromino.blocks = currentTetromino.blocks.map((block) => [
+    2 - block[1],
+    block[0],
+  ]);
+}
 
 function onKeyFall() {
   if (!canFall()) {
@@ -307,7 +333,8 @@ function onKeySave() {
     if (savedTetromino !== undefined) {
       currentTetromino = savedTetromino;
     } else {
-      currentTetromino = getRandomTetromino();
+      currentTetromino = nextTetromino;
+      nextTetromino = getRandomTetromino();
     }
     savedTetromino = temp;
     offset = [4, -1];
