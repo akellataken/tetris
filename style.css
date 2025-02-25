@@ -12,49 +12,43 @@ body {
 }
 
 body {
-  font-size: 50px;
-  font-family: "Micro 5", sans-serif, serif;
-  background-color: #000;
+  font: 50px "Micro 5", sans-serif, serif;
+  background: #000;
   color: #fff;
 }
 
 main {
-  display: flex;
   flex: 1;
+  display: flex;
   justify-content: space-evenly;
 }
 
 footer {
+  margin-top: 20px;
   text-align: center;
-  font-family: serif;
-  font-size: 14px;
+  font: 14px serif;
   color: #424242;
   position: relative;
-  margin-top: 20px;
 }
 
-h1 {
+h1,
+.score {
   text-align: center;
+}
+
+.sidebar,
+#game {
+  border: 8px double #fff;
+  border-radius: 10px;
 }
 
 .sidebar {
-  border: 8px double #fff;
-  border-radius: 10px;
   padding: 20px;
   width: 20%;
 }
 
 .sidebar fieldset:last-of-type {
   margin-bottom: 20px;
-}
-
-#game {
-  border: 8px double #fff;
-  border-radius: 10px;
-}
-
-.score {
-  text-align: center;
 }
 
 .controls p {
@@ -72,6 +66,5 @@ fieldset legend {
 #next,
 #saved {
   display: block;
-  margin: auto;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
 }

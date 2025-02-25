@@ -1,89 +1,53 @@
 const gameCanvas = document.getElementById("game");
 const nextCanvas = document.getElementById("next");
 const savedCanvas = document.getElementById("saved");
-const gameContext = gameCanvas.getContext("2d");
-const nextContext = nextCanvas.getContext("2d");
-const savedContext = savedCanvas.getContext("2d");
+const gameCtx = gameCanvas.getContext("2d");
+const nextCtx = nextCanvas.getContext("2d");
+const savedCtx = savedCanvas.getContext("2d");
 
-const CELL_SIZE = 20; // px
-const CANVAS_WIDTH = gameCanvas.width;
-const CANVAS_HEIGHT = gameCanvas.height;
-const NEXT_WIDTH = nextCanvas.width;
-const NEXT_HEIGHT = nextCanvas.height;
-const SAVED_WIDTH = savedCanvas.width;
-const SAVED_HEIGHT = savedCanvas.height;
-
-document.addEventListener("keydown", function (event) {
-  switch (event.code) {
-    case "KeyW":
-      onKeyRotate();
-      break;
-    case "KeyA":
-      onKeyLeft();
-      break;
-    case "KeyS":
-      onKeyFall();
-      break;
-    case "KeyD":
-      onKeyRight();
-      break;
-    case "KeyC":
-      onKeySave();
-      break;
-    case "KeyP":
-      onKeyPause();
-      break;
-    case "KeyR":
-      onKeyRestart();
-      break;
-    case "Space":
-      onKeyDrop();
-      break;
-    default:
-      console.log(`Unbinded key pressed: ${event.code}`);
-      break;
-  }
-  render();
-});
+const CELL_SIZE = 20;
+const FIELD_WIDTH = 10;
+const FIELD_HEIGHT = 20;
+const GAME_SPEED = 1.0;
 
 const Brush = {
-  LIGHT_GRAY: "rgb(42 42 42)",
-  GREEN: "rgb(0 255 0)",
-  DIM_GREEN: "rgb(0 200 0)",
-  DARK_GREEN: "rgb(0 155 0)",
-  BLUE: "rgb(0 0 255)",
-  DIM_BLUE: "rgb(0 0 200)",
-  DARK_BLUE: "rgb(0 0 155)",
-  ORANGE: "rgb(255 175 0)",
-  DIM_ORANGE: "rgb(235 152 0)",
-  DARK_ORANGE: "rgb(200 140 0)",
-  BLACK: "rgb(0 0 0)",
-  CYAN: "rgb(0 255 255)",
-  DIM_CYAN: "rgb(0 200 200)",
-  DARK_CYAN: "rgb(0 155 155)",
-  RED: "rgb(255 0 0)",
-  DIM_RED: "rgb(235 0 0)",
-  DARK_RED: "rgb(200 0 0)",
-  YELLOW: "rgb(255 255 0)",
-  DIM_YELLOW: "rgb(235 235 0)",
-  DARK_YELLOW: "rgb(200 200 0)",
-  PURPLE: "rgb(155 0 155)",
-  DIM_PURPLE: "rgb(140 0 140)",
-  DARK_PURPLE: "rgb(125 0 125)",
+  LIGHT_GRAY: "rgb(42,42,42)",
+  GREEN: "rgb(0,255,0)",
+  DIM_GREEN: "rgb(0,200,0)",
+  DARK_GREEN: "rgb(0,155,0)",
+  BLUE: "rgb(0,0,255)",
+  DIM_BLUE: "rgb(0,0,200)",
+  DARK_BLUE: "rgb(0,0,155)",
+  ORANGE: "rgb(255,175,0)",
+  DIM_ORANGE: "rgb(235,152,0)",
+  DARK_ORANGE: "rgb(200,140,0)",
+  BLACK: "rgb(0,0,0)",
+  CYAN: "rgb(0,255,255)",
+  DIM_CYAN: "rgb(0,200,200)",
+  DARK_CYAN: "rgb(0,155,155)",
+  RED: "rgb(255,0,0)",
+  DIM_RED: "rgb(235,0,0)",
+  DARK_RED: "rgb(200,0,0)",
+  YELLOW: "rgb(255,255,0)",
+  DIM_YELLOW: "rgb(235,235,0)",
+  DARK_YELLOW: "rgb(200,200,0)",
+  PURPLE: "rgb(155,0,155)",
+  DIM_PURPLE: "rgb(140,0,140)",
+  DARK_PURPLE: "rgb(125,0,125)",
 };
 
-function drawTriangle(x1, y1, x2, y2, x3, y3, brush, context) {
-  context.fillStyle = brush;
-  context.beginPath();
-  context.moveTo(x1, y1);
-  context.lineTo(x2, y2);
-  context.lineTo(x3, y3);
-  context.closePath();
-  context.fill();
-}
+const drawTriangle = (x1, y1, x2, y2, x3, y3, brush, ctx) => {
+  ctx.fillStyle = brush;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.lineTo(x3, y3);
+  ctx.closePath();
+  ctx.fill();
+};
 
-function drawBrick(x, y, darkBrush, dimBrush, brush, context) {
-  drawTriangle(x, y, x + CELL_SIZE, y, x, y + CELL_SIZE, brush, context);
+const drawBrick = (x, y, darkBrush, dimBrush, brush, ctx) => {
+  drawTriangle(x, y, x + CELL_SIZE, y, x, y + CELL_SIZE, brush, ctx);
   drawTriangle(
     x + CELL_SIZE,
     y,
@@ -92,38 +56,31 @@ function drawBrick(x, y, darkBrush, dimBrush, brush, context) {
     x,
     y + CELL_SIZE,
     darkBrush,
-    context
+    ctx
   );
-  context.fillStyle = dimBrush;
-  context.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-}
+  ctx.fillStyle = dimBrush;
+  ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+};
 
 const Brick = {
-  NONE: (x, y, context) => {
-    context.fillStyle = Brush.BLACK;
-    context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+  NONE: (x, y, ctx) => {
+    ctx.fillStyle = Brush.BLACK;
+    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
   },
-  GREEN: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_GREEN, Brush.DIM_GREEN, Brush.GREEN, context);
-  },
-  ORANGE: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_ORANGE, Brush.DIM_ORANGE, Brush.ORANGE, context);
-  },
-  BLUE: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_BLUE, Brush.DIM_BLUE, Brush.BLUE, context);
-  },
-  CYAN: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_CYAN, Brush.DIM_CYAN, Brush.CYAN, context);
-  },
-  RED: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_RED, Brush.DIM_RED, Brush.RED, context);
-  },
-  YELLOW: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_YELLOW, Brush.DIM_YELLOW, Brush.YELLOW, context);
-  },
-  PURPLE: (x, y, context) => {
-    drawBrick(x, y, Brush.DARK_PURPLE, Brush.DIM_PURPLE, Brush.PURPLE, context);
-  },
+  GREEN: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_GREEN, Brush.DIM_GREEN, Brush.GREEN, ctx),
+  ORANGE: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_ORANGE, Brush.DIM_ORANGE, Brush.ORANGE, ctx),
+  BLUE: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_BLUE, Brush.DIM_BLUE, Brush.BLUE, ctx),
+  CYAN: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_CYAN, Brush.DIM_CYAN, Brush.CYAN, ctx),
+  RED: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_RED, Brush.DIM_RED, Brush.RED, ctx),
+  YELLOW: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_YELLOW, Brush.DIM_YELLOW, Brush.YELLOW, ctx),
+  PURPLE: (x, y, ctx) =>
+    drawBrick(x, y, Brush.DARK_PURPLE, Brush.DIM_PURPLE, Brush.PURPLE, ctx),
 };
 
 const Tetromino = {
@@ -192,245 +149,175 @@ const Tetromino = {
   },
 };
 
-function getRandomTetromino() {
-  const tetrominoKeys = Object.keys(Tetromino);
-  const randomKey =
-    tetrominoKeys[Math.floor(Math.random() * tetrominoKeys.length)];
-  const original = Tetromino[randomKey];
+const getRandomTetromino = () => {
+  const keys = Object.keys(Tetromino);
+  const tet = Tetromino[keys[Math.floor(Math.random() * keys.length)]];
+  return { color: tet.color, blocks: tet.blocks.map((b) => [...b]) };
+};
 
-  return {
-    color: original.color,
-    blocks: original.blocks.map((block) => [block[0], block[1]]),
+let state = {
+  field: Array.from({ length: FIELD_WIDTH }, () =>
+    Array.from({ length: FIELD_HEIGHT }, () => Brick.NONE)
+  ),
+  current: getRandomTetromino(),
+  next: getRandomTetromino(),
+  saved: undefined,
+  offset: [4, -1],
+  paused: false,
+  alreadySaved: false,
+};
+
+const canMove = (dx, dy) =>
+  state.current.blocks.every(([bx, by]) => {
+    const x = bx + state.offset[0] + dx;
+    const y = by + state.offset[1] + dy;
+    if (x < 0 || x >= FIELD_WIDTH || y >= FIELD_HEIGHT) return false;
+    return y < 0 || state.field[x][y] === Brick.NONE;
+  });
+
+const actions = {
+  KeyW: () => {
+    state.current.blocks = state.current.blocks.map(([x, y]) => [2 - y, x]);
+  },
+  KeyA: () => {
+    if (canMove(-1, 0)) state.offset[0]--;
+  },
+  KeyD: () => {
+    if (canMove(1, 0)) state.offset[0]++;
+  },
+  KeyS: () => {
+    if (canMove(0, 1)) state.offset[1]++;
+    else fixateTetromino();
+  },
+  Space: () => {
+  },
+  KeyP: () => {
+    state.paused = !state.paused;
+  },
+  KeyC: () => {
+    if (!state.alreadySaved) {
+      [state.current, state.saved, state.next] = state.saved
+        ? [state.saved, state.current, state.next]
+        : [state.next, state.current, getRandomTetromino()];
+      state.offset = [4, -1];
+      state.alreadySaved = true;
+    }
+  },
+  KeyR: restartGame,
+};
+
+document.addEventListener("keydown", ({ code }) => {
+  if (actions[code]) actions[code]();
+  else console.log(`Unbound key: ${code}`);
+  render();
+});
+
+function fixateTetromino() {
+  state.current.blocks.forEach(([bx, by]) => {
+    const x = bx + state.offset[0];
+    const y = by + state.offset[1];
+    if (y >= 0 && x >= 0 && x < FIELD_WIDTH && y < FIELD_HEIGHT) {
+      state.field[x][y] = state.current.color;
+    }
+  });
+  clearLines();
+  state.current = state.next;
+  state.next = getRandomTetromino();
+  state.offset = [4, -1];
+  state.alreadySaved = false;
+}
+
+function clearLines() {
+  for (let y = 0; y < FIELD_HEIGHT; y++) {
+    if (state.field.every((col) => col[y] !== Brick.NONE)) {
+      for (let x = 0; x < FIELD_WIDTH; x++) {
+        state.field[x].splice(y, 1);
+        state.field[x].unshift(Brick.NONE);
+      }
+    }
+  }
+}
+
+function restartGame() {
+  state = {
+    field: Array.from({ length: FIELD_WIDTH }, () =>
+      Array.from({ length: FIELD_HEIGHT }, () => Brick.NONE)
+    ),
+    current: getRandomTetromino(),
+    next: getRandomTetromino(),
+    saved: undefined,
+    offset: [4, -1],
+    paused: false,
+    alreadySaved: false,
   };
 }
 
-// TODO: Try remaking 20 -> 10 instead of 10 -> 20
-let field = Array.from({ length: 10 }, () =>
-  Array.from({ length: 20 }, () => Brick.NONE)
-);
+const clear = (ctx, width, height) => {
+  ctx.fillStyle = Brush.BLACK;
+  ctx.fillRect(0, 0, width, height);
+};
 
-let currentTetromino = getRandomTetromino();
-let nextTetromino = getRandomTetromino();
-let savedTetromino;
-let gameSpeed = 1.0;
-let offset = [4, -1];
-let canRenderGameTick = false;
-let paused = false;
-let alreadySaved = false;
-
-function canMoveLeft() {
-  for (let i = 0; i < currentTetromino.blocks.length; i++) {
-    const tetro = currentTetromino.blocks[i];
-    if (
-      tetro[0] + offset[0] <= 0 ||
-      (field[tetro[0] + offset[0] - 1][tetro[1] + offset[1]] !== Brick.NONE &&
-        field[tetro[0] + offset[0] - 1][tetro[1] + offset[1]] !== undefined)
-    ) {
-      return false;
-    }
+function drawGrid(ctx, width, height) {
+  ctx.strokeStyle = Brush.LIGHT_GRAY;
+  ctx.beginPath();
+  for (let x = CELL_SIZE; x < width; x += CELL_SIZE + 1) {
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
   }
-  return true;
-}
-
-function canMoveRight() {
-  for (let i = 0; i < currentTetromino.blocks.length; i++) {
-    const tetro = currentTetromino.blocks[i];
-    if (
-      tetro[0] + offset[0] >= 9 ||
-      (field[tetro[0] + offset[0] + 1][tetro[1] + offset[1]] !== Brick.NONE &&
-        field[tetro[0] + offset[0] + 1][tetro[1] + offset[1]] !== undefined)
-    ) {
-      return false;
-    }
+  for (let y = CELL_SIZE; y < height; y += CELL_SIZE + 1) {
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
   }
-  return true;
-}
-
-function canFall() {
-  for (let i = 0; i < currentTetromino.blocks.length; i++) {
-    const tetro = currentTetromino.blocks[i];
-    if (
-      tetro[1] + offset[1] >= 19 ||
-      (field[tetro[0] + offset[0]][tetro[1] + offset[1] + 1] !== Brick.NONE &&
-        field[tetro[0] + offset[0]][tetro[1] + offset[1] + 1] !== undefined)
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// TODO: reimplement with full row swap.
-function clearLines() {
-  let fullLine = true;
-  for (let i = 0; i < field[0].length; i++) {
-    for (let j = field.length - 1; j > 0; j--) {
-      if (field[j][i] === Brick.NONE) {
-        fullLine = false;
-        break;
-      }
-    }
-    if (fullLine) {
-      for (let j = 0; j < field.length; j++) {
-        field[j][i] = Brick.NONE;
-        field[j].splice(j, 1);
-        field[j].splice(0, 0, Brick.NONE);
-      }
-    }
-    fullLine = true;
-  }
-}
-
-function fixateTetromino() {
-  for (let i = 0; i < currentTetromino.blocks.length; i++) {
-    const tetro = currentTetromino.blocks[i];
-    const x = tetro[0] + offset[0];
-    const y = tetro[1] + offset[1];
-    field[x][y] = currentTetromino.color;
-  }
-  clearLines();
-  currentTetromino = nextTetromino;
-  nextTetromino = getRandomTetromino();
-  offset = [4, -1];
-  alreadySaved = false;
-}
-
-function onKeyRight() {
-  if (!canMoveRight()) return;
-  offset = [offset[0] + 1, offset[1]];
-}
-
-function onKeyLeft() {
-  if (!canMoveLeft()) return;
-  offset = [offset[0] - 1, offset[1]];
-}
-
-function onKeyRotate() {
-  currentTetromino.blocks = currentTetromino.blocks.map((block) => [
-    2 - block[1],
-    block[0],
-  ]);
-}
-
-function onKeyFall() {
-  if (!canFall()) {
-    fixateTetromino();
-  } else {
-    offset = [offset[0], offset[1] + 1];
-  }
-}
-
-function onKeyDrop() {}
-
-function onKeyPause() {
-  paused = !paused;
-}
-
-function onKeySave() {
-  console.log(`alreadySaved = ${alreadySaved}`);
-  if (!alreadySaved) {
-    const temp = currentTetromino;
-    if (savedTetromino !== undefined) {
-      currentTetromino = savedTetromino;
-    } else {
-      currentTetromino = nextTetromino;
-      nextTetromino = getRandomTetromino();
-    }
-    savedTetromino = temp;
-    offset = [4, -1];
-    alreadySaved = true;
-  }
-}
-
-function onKeyRestart() {
-  offset = [4, -1];
-  field = Array.from({ length: 10 }, () =>
-    Array.from({ length: 20 }, () => Brick.NONE)
-  );
-  currentTetromino = getRandomTetromino();
-  nextTetromino = getRandomTetromino();
-  savedTetromino = undefined;
-  alreadySaved = false;
-}
-
-function clear(context, width, height) {
-  context.fillStyle = Brush.BLACK;
-  context.fillRect(0, 0, width, height);
-}
-
-function drawMarks(context, cellSize, width, height) {
-  context.strokeStyle = Brush.LIGHT_GRAY;
-  for (let i = cellSize + 1; i <= width; i += cellSize + 1) {
-    context.moveTo(i, 0);
-    context.lineTo(i, height);
-    context.stroke();
-  }
-
-  for (let i = cellSize + 1; i <= height; i += cellSize + 1) {
-    context.moveTo(0, i);
-    context.lineTo(width, i);
-    context.stroke();
-  }
+  ctx.stroke();
 }
 
 function drawField() {
-  for (let row = 0; row < field.length; row++) {
-    for (let column = 0; column < field[row].length; column++) {
-      field[row][column](
-        row * CELL_SIZE + row,
-        column * CELL_SIZE + column,
-        gameContext
-      );
+  for (let x = 0; x < FIELD_WIDTH; x++) {
+    for (let y = 0; y < FIELD_HEIGHT; y++) {
+      const posX = x * CELL_SIZE + x;
+      const posY = y * CELL_SIZE + y;
+      state.field[x][y](posX, posY, gameCtx);
     }
   }
 }
 
-function drawTetromino(tetromino, context, useOffset) {
-  if (tetromino === undefined || tetromino.blocks === 0) return;
-  tetromino.blocks.forEach((tetro) => {
-    if (tetro[1] + (useOffset ? offset[1] : 0) < 0) return;
-    const x =
-      (tetro[0] + (useOffset ? offset[0] : 0)) * CELL_SIZE +
-      (tetro[0] + (useOffset ? offset[0] : 0));
-    const y =
-      (tetro[1] + (useOffset ? offset[1] : 0)) * CELL_SIZE +
-      (tetro[1] + (useOffset ? offset[1] : 0));
-    tetromino.color(x, y, context);
+function drawTetromino(tetromino, ctx, useOffset = false) {
+  if (!tetromino) return;
+  tetromino.blocks.forEach(([bx, by]) => {
+    const offX = useOffset ? state.offset[0] : 0;
+    const offY = useOffset ? state.offset[1] : 0;
+    if (by + offY < 0) return;
+    const x = (bx + offX) * CELL_SIZE + (bx + offX);
+    const y = (by + offY) * CELL_SIZE + (by + offY);
+    tetromino.color(x, y, ctx);
   });
 }
 
-async function render() {
-  clear(gameContext, CANVAS_WIDTH, CANVAS_HEIGHT);
-  clear(nextContext, NEXT_WIDTH, NEXT_HEIGHT);
-  clear(savedContext, SAVED_WIDTH, SAVED_HEIGHT);
-  drawMarks(gameContext, CELL_SIZE, CANVAS_WIDTH, CANVAS_HEIGHT);
+function render() {
+  clear(gameCtx, gameCanvas.width, gameCanvas.height);
+  clear(nextCtx, nextCanvas.width, nextCanvas.height);
+  clear(savedCtx, savedCanvas.width, savedCanvas.height);
+  drawGrid(gameCtx, gameCanvas.width, gameCanvas.height);
   drawField();
-  drawTetromino(currentTetromino, gameContext, true);
-  drawTetromino(nextTetromino, nextContext, false);
-  drawTetromino(savedTetromino, savedContext, false);
+  drawTetromino(state.current, gameCtx, true);
+  drawTetromino(state.next, nextCtx);
+  drawTetromino(state.saved, savedCtx);
 }
 
-async function gameTickLoop() {
-  await new Promise((resolve) => {
-    canRenderGameTick = true;
-    setTimeout(resolve, 1000 / gameSpeed);
-  });
-  gameTickLoop();
+function update() {
+  if (!state.paused) {
+    if (canMove(0, 1)) state.offset[1]++;
+    else fixateTetromino();
+  }
 }
 
-async function gameLoop() {
+function gameLoop() {
   render();
-  await new Promise((resolve) => {
-    if (!paused) {
-      if (canRenderGameTick) {
-        onKeyFall();
-        canRenderGameTick = false;
-      }
-      setTimeout(resolve, 1000 / 60);
-    }
-  });
-  window.requestAnimationFrame(gameLoop);
+  requestAnimationFrame(gameLoop);
 }
 
-window.requestAnimationFrame(gameLoop);
-gameTickLoop();
+setInterval(() => {
+  if (!state.paused) update();
+}, 1000 / GAME_SPEED);
+
+requestAnimationFrame(gameLoop);
