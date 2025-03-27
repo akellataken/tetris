@@ -2,7 +2,7 @@
 ##### FEATURES
 
 - [ ] Display paused/resumed state of the game.
-- [ ] Refactor to multiple files.
+- [x] Refactor to multiple files.
 - [ ] Implement score and top score stored in cookies(?).
 - [ ] Implement game end.
 - [ ] Add music and SFX.
@@ -12,10 +12,11 @@
 
 ##### BUGS
 
-- [ ] Re-implement spinning to fix shift for non-symmentrical tetrinos.
-- [ ] Check if possible to spin to avoid clipping.
+- [ ] Spinning non-symmetrical tetrominoes shift their position relative to center.
+- [ ] Spinning near walls or other tetrominoes can clip tetromino.
+- [ ] Saved tetromino saves rotation shape.
 
 ##### MISCELLANIOUS
 
-- [x] Write JSDoc.
+- [ ] Write JSDoc.
 - [ ] Write README.
