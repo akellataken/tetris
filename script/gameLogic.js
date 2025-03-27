@@ -1,7 +1,7 @@
-import { FIELD_WIDTH, FIELD_HEIGHT, CELL_SIZE } from './constants.js';
-import { Brick } from './bricks.js';
-import { getRandomTetromino } from './tetrominoes.js';
-import { state } from './gameState.js';
+import { FIELD_WIDTH, FIELD_HEIGHT, CELL_SIZE } from "./constants.js";
+import { Brick } from "./bricks.js";
+import { getRandomTetromino } from "./tetrominoes.js";
+import { state } from "./gameState.js";
 
 /**
  * Checks if the current tetromino can move by the specified offsets.
@@ -13,6 +13,26 @@ const canMove = (dx, dy) =>
     if (x < 0 || x >= FIELD_WIDTH || y >= FIELD_HEIGHT) return false;
     return y < 0 || state.field[x][y] === Brick.NONE;
   });
+
+/**
+ * Check if the current tetromino can be rotated.
+ */
+const canRotate = () => {
+  return !state.current.blocks.some(([bx, by]) => {
+    const x = 2- by + state.offset[0];
+    const y = bx + state.offset[1];
+    const result =  x < 0 || y < 0 || state.field[x][y] !== Brick.NONE;
+    return result;
+  });
+};
+
+/**
+ * Rotates current tetomino clockwise by 90 deg.
+ * TODO: Fix spin for line and cube.
+ */
+const rotate = () => {
+  state.current.blocks = state.current.blocks.map(([x, y]) => [2 - y, x]);
+};
 
 /**
  * Fixates the current tetromino on the game field and prepares the next one.
@@ -69,4 +89,12 @@ function drawField(gameCtx) {
   }
 }
 
-export { canMove, fixateTetromino, clearLines, update, drawField };
+export {
+  canMove,
+  canRotate,
+  rotate,
+  fixateTetromino,
+  clearLines,
+  update,
+  drawField,
+};

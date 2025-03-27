@@ -1,12 +1,12 @@
 import { state } from './gameState.js';
-import { canMove, fixateTetromino } from './gameLogic.js';
+import { canMove, fixateTetromino, canRotate, rotate } from './gameLogic.js';
 import { restartGame } from './gameState.js';
 import { render } from './renderer.js';
 import { getRandomTetromino } from './tetrominoes.js';
 
 const actions = {
   KeyW: () => {
-    state.current.blocks = state.current.blocks.map(([x, y]) => [2 - y, x]);
+    if (canRotate()) rotate();
   },
   KeyA: () => {
     if (canMove(-1, 0)) state.offset[0]--;

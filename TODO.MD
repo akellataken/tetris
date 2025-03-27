@@ -13,7 +13,7 @@
 ##### BUGS
 
 - [ ] Spinning non-symmetrical tetrominoes shift their position relative to center.
-- [ ] Spinning near walls or other tetrominoes can clip tetromino.
+- [x] Spinning near walls or other tetrominoes can clip tetromino.
 - [ ] Saved tetromino saves rotation shape.
 
 ##### MISCELLANIOUS
